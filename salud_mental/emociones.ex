@@ -33,7 +33,6 @@ defmodule Diario do
   # ============================================
   def ver_todas(lista), do: lista
 
-  # ✅ ESTA FUNCIÓN AHORA SÍ SE USA
   def buscar_por_id(lista, id) do
     case Enum.find(lista, fn e -> e.id == id end) do
       nil -> {:error, "No encontrado"}
@@ -152,7 +151,6 @@ defmodule App do
         esperar()
         menu(data)
 
-      # ✅ NUEVA OPCIÓN: Ver intensas
       "4" ->
         resultados = Diario.intensidad_alta(data)
 
