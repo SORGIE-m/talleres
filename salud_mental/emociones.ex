@@ -65,7 +65,13 @@ defmodule Diario do
   # DELETE - Eliminar
   # ============================================
   def eliminar(lista, id) do
-    Enum.filter(lista, fn e -> e.id != id end)
+  case Enum.find(lista, fn e -> e.id == id end) do
+    nil ->
+      {:error, "El ID #{id} no existe"}
+    _ ->
+      nueva_lista = Enum.filter(lista, fn e -> e.id != id end)
+      {:ok, nueva_lista}
+   end
   end
 
   # ============================================
@@ -130,13 +136,21 @@ defmodule App do
         esperar()
         menu(nueva_data)
 
+      # En el módulo App - OPCIÓN 4 CORREGIDA
       "4" ->
-        id = IO.gets("ID a eliminar: ") |> String.trim() |> String.to_integer()
-        nueva_data = Diario.eliminar(data, id)
-        IO.puts("✅ Eliminado")
-        esperar()
-        menu(nueva_data)
+       id = IO.gets("ID a eliminar: ") |> String.trim() |> String.to_integer()
 
+       case Diario.eliminar(data, id) do
+       {:ok, nueva_data} ->
+         IO.puts("✅ Eliminado correctamente")
+         esperar()
+       menu(nueva_data)
+
+      {:error, mensaje} ->
+       IO.puts("❌ #{mensaje}")
+       esperar()
+       menu(data)
+      end
       "5" ->
         r = Diario.resumen(data)
         IO.puts("📊 Total: #{r.total}")
