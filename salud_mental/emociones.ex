@@ -1,3 +1,10 @@
+# ============================================
+# Estructura para guardar una emoción
+# ============================================
+# Emocion: Define qué propiedades tiene cada emoción (clave-valor)
+#   - id: Número único que identifica la emoción
+#   - nombre: Texto con el tipo de emoción (\"feliz\", \"triste\", etc)
+#   - intensidad: Número del 1-10 que dice qué tan fuerte es
 defmodule Emocion do
   defstruct [:id, :nombre, :intensidad]
 end
@@ -6,6 +13,8 @@ defmodule Diario do
   # ============================================
   # DATOS INICIALES
   # ============================================
+  # iniciar: Carga las emociones de ejemplo al principio
+  # Devuelve una lista con 4 emociones predefinidas para empezar
   def iniciar do
     [
       %Emocion{id: 1, nombre: "feliz", intensidad: 8},
@@ -16,8 +25,11 @@ defmodule Diario do
   end
 
   # ============================================
-  # CREATE
+  # CREATE - Agregar
   # ============================================
+  # agregar: Añade una nueva emoción a la lista
+  # Busca el ID más alto que existe, le suma 1, y crea la nueva emoción
+  # Devuelve la lista original + la nueva emoción al final
   def agregar(lista, nombre, intensidad) do
     ultimo_id = case Enum.map(lista, fn e -> e.id end) do
       [] -> 0
@@ -29,10 +41,15 @@ defmodule Diario do
   end
 
   # ============================================
-  # READ
+  # READ - Consultas/Búsquedas
   # ============================================
+  # ver_todas: Simplemente devuelve toda la lista de emociones
+  # No hace ningún filtro, solo muestra todo tal como está
   def ver_todas(lista), do: lista
 
+  # buscar_por_id: Busca UNA emoción específica por su ID
+  # Si la encuentra, devuelve {:ok, emoción}
+  # Si no existe, devuelve {:error, "No encontrado"}
   def buscar_por_id(lista, id) do
     case Enum.find(lista, fn e -> e.id == id end) do
       nil -> {:error, "No encontrado"}
@@ -40,17 +57,23 @@ defmodule Diario do
     end
   end
 
+  # filtrar_por_nombre: Busca TODAS las emociones con un nombre específico
+  # Por ejemplo, todas las que digan "feliz"  Devuelve una lista (puede estar vacía)
   def filtrar_por_nombre(lista, nombre) do
     Enum.filter(lista, fn e -> e.nombre == nombre end)
   end
 
+  # intensidad_alta: Busca TODAS las emociones "fuertes" (intensidad >= 7)
+  # Devuelve una lista solo con las emociones que son muy intensas
   def intensidad_alta(lista) do
     Enum.filter(lista, fn e -> e.intensidad >= 7 end)
   end
 
   # ============================================
-  # UPDATE
+  # UPDATE - Modificar
   # ============================================
+  # actualizar: Cambia el nombre y/o intensidad de una emoción existente
+  # Busca la emoción por ID, la modifica, y devuelve la lista actualizada
   def actualizar(lista, id, nuevo_nombre, nueva_intensidad) do
     Enum.map(lista, fn e ->
       if e.id == id do
@@ -62,8 +85,11 @@ defmodule Diario do
   end
 
   # ============================================
-  # DELETE
+  # DELETE - Eliminar
   # ============================================
+  # eliminar: Borra una emoción de la lista usando su ID
+  # Si la encuentra, devuelve {:ok, lista_sin_esa_emoción}
+  # Si no existe ese ID, devuelve {:error, mensaje de error}
   def eliminar(lista, id) do
     case Enum.find(lista, fn e -> e.id == id end) do
       nil ->
@@ -75,8 +101,13 @@ defmodule Diario do
   end
 
   # ============================================
-  # ESTADÍSTICAS
+  # ESTADÍSTICAS - Análisis
   # ============================================
+  # resumen: Calcula números útiles sobre todas las emociones
+  # Devuelve un mapa con:
+  #   - total: cuántas emociones hay
+  #   - felices: cuántas son "feliz"
+  #   - intensidad_promedio: promedio de intensidad (suma / cantidad)
   def resumen(lista) do
     %{
       total: Enum.count(lista),
@@ -92,14 +123,19 @@ defmodule Diario do
 end
 
 # ============================================
-# INTERFAZ DE USUARIO
+# INTERFAZ DE USUARIO - El menú interactivo
 # ============================================
 defmodule App do
+  # run: Inicia la aplicación
+  # Carga los datos iniciales y abre el menú principal
   def run do
     data = Diario.iniciar()
     menu(data)
   end
 
+  # menu: Genera el menú repetitivo
+  # Muestra opciones, lee lo que el usuario elige, ejecuta la acción
+  # y luego vuelve a mostrar el menú (ciclo infinito hasta que escriba "0")
   defp menu(data) do
     IO.puts("\n=== MIS EMOCIONES ===")
     IO.puts("1. Ver todas")
@@ -211,10 +247,14 @@ defmodule App do
     end
   end
 
+  # esperar: Pausa la ejecución hasta que el usuario presione Enter
+  # Permite que el usuario lea el resultado antes de volver al menú
   defp esperar do
     IO.gets("Enter para continuar...")
   end
 end
 
-# Ejecutar
+# ============================================
+# Inicia la aplicación
+# ============================================
 App.run()
