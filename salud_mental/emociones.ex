@@ -16,15 +16,22 @@ defmodule Diario do
   end
 
   # ============================================
-  # CREATE
+  # CREATE (con validación)
   # ============================================
   def agregar(lista, nombre, intensidad) do
+    # Validar intensidad
+    intensidad_valida = case intensidad do
+      i when i < 1 -> 1
+      i when i > 10 -> 10
+      i -> i
+    end
+
     ultimo_id = case Enum.map(lista, fn e -> e.id end) do
       [] -> 0
       ids -> Enum.max(ids)
     end
 
-    nuevo = %Emocion{id: ultimo_id + 1, nombre: nombre, intensidad: intensidad}
+    nuevo = %Emocion{id: ultimo_id + 1, nombre: nombre, intensidad: intensidad_valida}
     lista ++ [nuevo]
   end
 
@@ -49,12 +56,19 @@ defmodule Diario do
   end
 
   # ============================================
-  # UPDATE
+  # UPDATE (con validación)
   # ============================================
   def actualizar(lista, id, nuevo_nombre, nueva_intensidad) do
+    # Validar intensidad
+    intensidad_valida = case nueva_intensidad do
+      i when i < 1 -> 1
+      i when i > 10 -> 10
+      i -> i
+    end
+
     Enum.map(lista, fn e ->
       if e.id == id do
-        %Emocion{e | nombre: nuevo_nombre, intensidad: nueva_intensidad}
+        %Emocion{e | nombre: nuevo_nombre, intensidad: intensidad_valida}
       else
         e
       end
@@ -122,7 +136,6 @@ defmodule App do
         esperar()
         menu(data)
 
-
       "2" ->
         id = IO.gets("ID a buscar: ") |> String.trim() |> String.to_integer()
 
@@ -135,7 +148,6 @@ defmodule App do
         end
         esperar()
         menu(data)
-
 
       "3" ->
         nombre = IO.gets("Nombre a filtrar (feliz/triste/cansado): ") |> String.trim()
@@ -164,18 +176,42 @@ defmodule App do
         esperar()
         menu(data)
 
-      "5" ->  # Agregar
-        nombre = IO.gets("Nombre (feliz/triste/cansado): ") |> String.trim()
-        intensidad = IO.gets("Intensidad (1-10): ") |> String.trim() |> String.to_integer()
+      "5" ->  # AGREGAR CON VALIDACIÓN
+        nombre = IO.gets("¿Cómo se siente? (feliz/triste/cansado): ") |> String.trim()
+
+        # Validar intensidad en la entrada
+        intensidad = case IO.gets("Intensidad (1-10): ") |> String.trim() do
+          "" -> 5  # Valor por defecto si no ingresa nada
+          valor ->
+            case Integer.parse(valor) do
+              {num, ""} when num >= 1 and num <= 10 -> num
+              _ ->
+                IO.puts("⚠️ Intensidad inválida. Se usará 5 por defecto")
+                5
+            end
+        end
+
         nueva_data = Diario.agregar(data, nombre, intensidad)
-        IO.puts("✅ Agregado")
+        IO.puts("✅ Agregado con intensidad: #{intensidad}")
         esperar()
         menu(nueva_data)
 
-      "6" ->  # Actualizar
+      "6" ->  # ACTUALIZAR CON VALIDACIÓN
         id = IO.gets("ID a actualizar: ") |> String.trim() |> String.to_integer()
         nombre = IO.gets("Nuevo nombre: ") |> String.trim()
-        intensidad = IO.gets("Nueva intensidad: ") |> String.trim() |> String.to_integer()
+
+        # Validar intensidad en la entrada
+        intensidad = case IO.gets("Nueva intensidad (1-10): ") |> String.trim() do
+          "" -> 5  # Valor por defecto
+          valor ->
+            case Integer.parse(valor) do
+              {num, ""} when num >= 1 and num <= 10 -> num
+              _ ->
+                IO.puts("⚠️ Intensidad inválida. Se usará 5 por defecto")
+                5
+            end
+        end
+
         nueva_data = Diario.actualizar(data, id, nombre, intensidad)
         IO.puts("✅ Actualizado")
         esperar()
