@@ -201,7 +201,7 @@ defmodule App do
         menu(data)
 
       "5" ->  # Agregar
-        nombre = IO.gets("Nombre (feliz/triste/cansado): ") |> String.trim()
+        nombre = IO.gets("¿Como se siente? (feliz/triste/cansado): ") |> String.trim()
         intensidad = IO.gets("Intensidad (1-10): ") |> String.trim() |> String.to_integer()
         nueva_data = Diario.agregar(data, nombre, intensidad)
         IO.puts("✅ Agregado")
