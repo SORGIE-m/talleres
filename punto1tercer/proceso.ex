@@ -7,46 +7,62 @@ defmodule Proceso do
       [5, 101, 6, 34]
     ]
 
-    t1 = Task.async(fn -> s1(matriz, 0, 0) end)
-    t2 = Task.async(fn -> s2(matriz, 0, 0, 0) end)
+    t1 = Task.async(fn -> s1(matriz) end)
+    t2 = Task.async(fn -> s2(matriz) end)
 
     suma_debajo = Task.await(t1)
-    {suma_total, total_elementos} = Task.await(t2)
-    promedio = suma_total / total_elementos
+    promedio = Task.await(t2)
 
+    IO.puts("DEBUG: suma_debajo = #{suma_debajo}")
+    IO.puts("DEBUG: promedio = #{promedio}")
+
+    t3 = Task.async(fn -> s3(suma_debajo, promedio) end)
+    t4 = Task.async(fn -> s4(suma_debajo, promedio) end)
+
+    Task.await(t3)
+    Task.await(t4)
+  end
+
+  # s1: Suma debajo de diagonal - Versión CORREGIDA
+  def s1(matriz) do
+    matriz
+    |> Enum.with_index()
+    |> Enum.reduce(0, fn {fila, i}, acc_fila ->
+      fila
+      |> Enum.with_index()
+      |> Enum.reduce(acc_fila, fn {valor, j}, acc_col ->
+        if i > j do
+          acc_col + valor
+        else
+          acc_col
+        end
+      end)
+    end)
+  end
+
+  # s2: Promedio de todos los números
+  def s2(matriz) do
+    {suma, total} = matriz
+    |> Enum.reduce({0, 0}, fn fila, {acc_sum, acc_count} ->
+      {suma_fila, count_fila} = fila
+      |> Enum.reduce({0, 0}, fn valor, {s, c} ->
+        {s + valor, c + 1}
+      end)
+      {acc_sum + suma_fila, acc_count + count_fila}
+    end)
+    suma / total
+  end
+
+  def s3(suma_debajo, promedio) do
     c = suma_debajo * promedio
     IO.puts("s3: c = #{suma_debajo} * #{promedio} = #{c}")
+    c
+  end
+
+  def s4(suma_debajo, promedio) do
+    c = suma_debajo * promedio
     IO.puts("s4: El valor de c es: #{c}")
-  end
-
-  def s1([], _fila_idx, suma), do: suma
-
-  def s1([fila | resto], fila_idx, suma) do
-    suma_fila = s1_fila(fila, fila_idx, 0, 0)
-    s1(resto, fila_idx + 1, suma + suma_fila)
-  end
-
-  defp s1_fila([], _col_idx, _fila_idx, suma), do: suma
-
-  defp s1_fila([head | tail], col_idx, fila_idx, suma) do
-    if fila_idx > col_idx do
-      s1_fila(tail, col_idx + 1, fila_idx, suma + head)
-    else
-      s1_fila(tail, col_idx + 1, fila_idx, suma)
-    end
-  end
-
-  def s2([], _fila_idx, suma, cantidad), do: {suma, cantidad}
-
-  def s2([fila | resto], fila_idx, suma, cantidad) do
-    {suma_fila, cant_fila} = s2_fila(fila, 0, 0)
-    s2(resto, fila_idx + 1, suma + suma_fila, cantidad + cant_fila)
-  end
-
-  defp s2_fila([], suma, cantidad), do: {suma, cantidad}
-
-  defp s2_fila([head | tail], suma, cantidad) do
-    s2_fila(tail, suma + head, cantidad + 1)
+    c
   end
 end
 
