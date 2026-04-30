@@ -9,9 +9,7 @@ defmodule calcular_devuelta do
   calcular(valor_total, valor_entregado)
   |> generar_mensaje()
   |> Util.mostrar_mensaje()
-end
+  end
 
-defp generar_mensaje do
-  
-end
+
 end
